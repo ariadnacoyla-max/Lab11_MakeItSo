@@ -1,3 +1,4 @@
+
 /*
 Copyright 2022 Google LLC
 
@@ -12,7 +13,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
- */
+*/
 
 package com.example.makeitso.screens.tasks
 
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.makeitso.R.drawable as AppIcon
 import com.example.makeitso.R.string as AppText
 import com.example.makeitso.common.composable.ActionToolbar
@@ -35,21 +37,18 @@ import com.example.makeitso.common.ext.smallSpacer
 import com.example.makeitso.common.ext.toolbarActions
 import com.example.makeitso.model.Task
 import com.example.makeitso.theme.MakeItSoTheme
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 @ExperimentalMaterialApi
-
 fun TasksScreen(
   openScreen: (String) -> Unit,
   viewModel: TasksViewModel = hiltViewModel()
 ) {
   // Observa las tareas almacenadas en Cloud Firestore
-  val tasks = viewModel
-    .tasks
-    .collectAsStateWithLifecycle(emptyList())
+  val tasks = viewModel.tasks.collectAsStateWithLifecycle(emptyList())
 
   TasksScreenContent(
+    tasks = tasks.value,
     onAddClick = viewModel::onAddClick,
     onSettingsClick = viewModel::onSettingsClick,
     onTaskCheckChange = viewModel::onTaskCheckChange,
@@ -62,12 +61,12 @@ fun TasksScreen(
   }
 }
 
-
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 @ExperimentalMaterialApi
 fun TasksScreenContent(
   modifier: Modifier = Modifier,
+  tasks: List<Task>,
   onAddClick: ((String) -> Unit) -> Unit,
   onSettingsClick: ((String) -> Unit) -> Unit,
   onTaskCheckChange: (Task) -> Unit,
@@ -82,11 +81,15 @@ fun TasksScreenContent(
         contentColor = MaterialTheme.colors.onPrimary,
         modifier = modifier.padding(16.dp)
       ) {
-        Icon(Icons.Filled.Add, "Add")
+        Icon(Icons.Filled.Add, contentDescription = "Add")
       }
     }
   ) {
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight()
+    ) {
       ActionToolbar(
         title = AppText.tasks,
         modifier = Modifier.toolbarActions(),
@@ -96,13 +99,22 @@ fun TasksScreenContent(
 
       Spacer(modifier = Modifier.smallSpacer())
 
+      // Muestra las tareas obtenidas desde Cloud Firestore
       LazyColumn {
-        items(emptyList<Task>(), key = { it.id }) { taskItem ->
+        items(tasks, key = { it.id }) { taskItem ->
           TaskItem(
             task = taskItem,
             options = listOf(),
-            onCheckChange = { onTaskCheckChange(taskItem) },
-            onActionClick = { action -> onTaskActionClick(openScreen, taskItem, action) }
+            onCheckChange = {
+              onTaskCheckChange(taskItem)
+            },
+            onActionClick = { action ->
+              onTaskActionClick(
+                openScreen,
+                taskItem,
+                action
+              )
+            }
           )
         }
       }
@@ -116,6 +128,7 @@ fun TasksScreenContent(
 fun TasksScreenPreview() {
   MakeItSoTheme {
     TasksScreenContent(
+      tasks = emptyList(),
       onAddClick = { },
       onSettingsClick = { },
       onTaskCheckChange = { },
