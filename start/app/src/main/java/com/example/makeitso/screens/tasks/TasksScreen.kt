@@ -35,13 +35,20 @@ import com.example.makeitso.common.ext.smallSpacer
 import com.example.makeitso.common.ext.toolbarActions
 import com.example.makeitso.model.Task
 import com.example.makeitso.theme.MakeItSoTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 @ExperimentalMaterialApi
+
 fun TasksScreen(
   openScreen: (String) -> Unit,
   viewModel: TasksViewModel = hiltViewModel()
 ) {
+  // Observa las tareas almacenadas en Cloud Firestore
+  val tasks = viewModel
+    .tasks
+    .collectAsStateWithLifecycle(emptyList())
+
   TasksScreenContent(
     onAddClick = viewModel::onAddClick,
     onSettingsClick = viewModel::onSettingsClick,
@@ -50,8 +57,11 @@ fun TasksScreen(
     openScreen = openScreen
   )
 
-  LaunchedEffect(viewModel) { viewModel.loadTaskOptions() }
+  LaunchedEffect(viewModel) {
+    viewModel.loadTaskOptions()
+  }
 }
+
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
