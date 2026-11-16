@@ -33,6 +33,7 @@ import com.example.makeitso.common.ext.card
 import com.example.makeitso.common.ext.spacer
 import com.example.makeitso.theme.MakeItSoTheme
 
+
 @ExperimentalMaterialApi
 @Composable
 fun SettingsScreen(
@@ -40,14 +41,21 @@ fun SettingsScreen(
   openScreen: (String) -> Unit,
   viewModel: SettingsViewModel = hiltViewModel()
 ) {
+  val uiState by viewModel.uiState.collectAsState(
+    initial = SettingsUiState(false)
+  )
+
   SettingsScreenContent(
-    uiState = viewModel.uiState,
+    uiState = uiState,
     onLoginClick = { viewModel.onLoginClick(openScreen) },
     onSignUpClick = { viewModel.onSignUpClick(openScreen) },
     onSignOutClick = { viewModel.onSignOutClick(restartApp) },
-    onDeleteMyAccountClick = { viewModel.onDeleteMyAccountClick(restartApp) }
+    onDeleteMyAccountClick = {
+      viewModel.onDeleteMyAccountClick(restartApp)
+    }
   )
 }
+
 
 @ExperimentalMaterialApi
 @Composable
