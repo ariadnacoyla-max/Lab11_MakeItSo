@@ -55,6 +55,7 @@ class SignUpViewModel @Inject constructor(
     uiState.value = uiState.value.copy(repeatPassword = newValue)
   }
 
+
   fun onSignUpClick(openAndPopUp: (String, String) -> Unit) {
     if (!email.isValidEmail()) {
       SnackbarManager.showMessage(AppText.email_error)
@@ -72,7 +73,9 @@ class SignUpViewModel @Inject constructor(
     }
 
     launchCatching {
-      //TODO
+      accountService.linkAccount(email, password)
+      openAndPopUp(SETTINGS_SCREEN, SIGN_UP_SCREEN)
     }
   }
+
 }
